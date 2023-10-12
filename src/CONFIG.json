@@ -1,0 +1,6 @@
+{
+  "API_BASE": "https://pixgrid-api.pixivel.moe/",
+  "IMAGE_PROXY_HOSTS": [
+    "https://proxy.pixivel.moe/"
+  ]
+}
