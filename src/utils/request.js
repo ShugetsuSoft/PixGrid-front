@@ -5,6 +5,13 @@ export async function cacheSearch(imageHash) {
     const response = await fetch(CONFIG.API_BASE + "api/search/" + imageHash, {
       method: "GET",
     });
+    if (!response.ok) {
+      if (response.status == 404) {
+        return null;
+      } else {
+        throw new Error("返回状态错误: " + (await response.text()));
+      }
+    }
     const body = response.json();
     return body;
   } catch (e) {
