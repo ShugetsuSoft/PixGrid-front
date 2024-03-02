@@ -1,9 +1,10 @@
 <script setup>
 import {useRoute, useRouter} from "vue-router";
-import {onMounted, ref} from "vue";
+import {onMounted, ref, onBeforeUnmount} from "vue";
 import {resultCache as resultCacheStore} from "../store.js";
 import {message} from "@any-design/anyui";
 import {calcImg} from '../utils/imgReso.js'
+import r18Banner from '../assets/images/r18.jpg'
 
 const route = useRoute()
 const router = useRouter()
@@ -11,6 +12,7 @@ const cacheStore = resultCacheStore()
 
 const hash = ref('')
 const result = ref([])
+const original = ref('')
 
 const load = async () => {
   hash.value = route.params["hash"]
@@ -40,10 +42,35 @@ const load = async () => {
   }).filter((item) => {
     return item.id != 0
   })
+  console.log(results)
+  if (results.file) {
+    const blob = new Blob([results.file], {type: results.file.type});
+    original.value = URL.createObjectURL(blob);
+  }
+}
+
+const calcLink = (illust) => {
+  if (illust.banned) {
+    return 'https://www.pixiv.net/artworks/' + illust.id.toString()
+  }
+  return 'https://pixivel.moe/illust/' + illust.id.toString()
+}
+
+const calcImgSafe = (illust) => {
+  if (illust.banned) {
+    return r18Banner
+  }
+  return calcImg(illust.id, 0, illust.image, 'thumb_mini')
 }
 
 onMounted(async () => {
   await load()
+})
+
+onBeforeUnmount(() => {
+  if (original.value !== "") {
+    URL.revokeObjectURL(original.value)
+  }
 })
 
 </script>
@@ -55,10 +82,21 @@ onMounted(async () => {
       <div class="component right"></div>
     </div>
     <div class="main-wrapper">
-      <a v-for="(illust, i) in result" :key="illust.id" :href="'https://pixivel.moe/illust/' + illust.id.toString()"
+      <div class="original-container" v-if="original">
+        <img class="image" :src="original">
+        <p class="info-container">
+          PixGrid 系统初始化... {{ hash }}<br>
+          系统已接收到指令...<br>
+          计算中...<br>
+          计算完毕，结果置信度已显示<br>
+          共有 {{ result.length }} 张图片<br>
+          结果显示{{ result[0]["score"] > 0.93 ? "较高的匹配概率" : "成功的可能性较低" }}
+        </p>
+      </div>
+      <a v-for="(illust, i) in result" :key="illust.id" :href="calcLink(illust)"
          target="_blank">
         <div class="item" :style="{'animation-delay': `${i*0.2}s`}">
-          <img :src="calcImg(illust.id, 0, illust.image, 'thumb_mini')" width="128" height="128" class="image"/>
+          <img :src="calcImgSafe(illust)" width="128" height="128" class="image"/>
           <div class="details">
             <div class="group-top">
               <div class="title">{{ illust.altTitle }}</div>
@@ -124,6 +162,44 @@ onMounted(async () => {
       clip-path: polygon(100% 0%, 0% 100%, 100% 100%);
       background: rgb(243, 116, 51);
       animation: hide-down 1s ease-in-out;
+    }
+  }
+
+  .original-container {
+    width: 100%;
+    height: 20rem;
+    padding: 10px;
+    box-sizing: border-box;
+    margin-bottom: 15px;
+
+    box-shadow: 0 8px 12px var(--shadow-5);
+    border-radius: 16px;
+    background: var(--bg-bright);
+    display: flex;
+    justify-content: center;
+    flex-wrap: nowrap;
+
+    .info-container {
+      color: var(--text);
+      font-size: 16px;
+      line-height: 32px;
+      word-wrap: anywhere;
+      white-space: pre-wrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      letter-spacing: .05rem;
+      margin-bottom: 5px;
+      padding-left: 10px;
+      box-sizing: border-box;
+    }
+
+    .image {
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 10px;
     }
   }
 

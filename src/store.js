@@ -14,7 +14,10 @@ export const resultCache = defineStore("resultCache", {
       const state = await this.ensure(hash);
       if (!state) {
         const response = await uploadSearch(resized);
-        this.cache[hash] = response;
+        this.cache[hash] = {
+          ...response,
+          file: file,
+        };
       }
       return hash;
     },

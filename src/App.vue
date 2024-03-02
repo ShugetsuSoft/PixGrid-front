@@ -1,8 +1,10 @@
 <script setup>
 import {RouterView, useRoute} from 'vue-router';
+import Nav from './components/nav.vue';
 </script>
 
 <template>
+  <Nav/>
   <router-view v-slot="{ Component }">
     <transition name="fade">
       <component :is="Component"/>
