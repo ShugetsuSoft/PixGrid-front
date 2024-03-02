@@ -90,7 +90,7 @@ onBeforeUnmount(() => {
           计算中...<br>
           计算完毕，结果置信度已显示<br>
           共有 {{ result.length }} 张图片<br>
-          结果显示{{ result[0]["score"] > 0.93 ? "较高的匹配概率" : "成功的可能性较低" }}
+          结果显示{{ result[0]["score"] > 0.92 ? "较高的匹配概率" : "成功的可能性较低" }}
         </p>
       </div>
       <a v-for="(illust, i) in result" :key="illust.id" :href="calcLink(illust)"
